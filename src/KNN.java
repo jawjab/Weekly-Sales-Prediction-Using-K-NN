@@ -8,18 +8,43 @@ import java.util.Scanner;
 
 public class KNN {
 	final static String pathPattern = "./data/";
-	
+
 	public static void main(String[] args) throws FileNotFoundException {
 		double[][] trainData = read(pathPattern+"train.csv",421570);
 		double[][] testData = read(pathPattern+"test.csv",115064);
 		long startTime = System.nanoTime();
-		predict(trainData,testData,3);
+		predict(trainData,testData,5);
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime);
 		System.out.println(duration);
 	}
-	
-	public static void predict(double[][] train,double[][] test,int k) {
+
+	public static void predict(double[][] train,double[][] test,int k) throws FileNotFoundException {
+		
+		
+		String fileName= "./data/test.csv";
+		File file= new File(fileName);
+		Scanner inputStream = new Scanner(file);
+		String[] columns = inputStream.next().split(",");
+		String[] data = new String[115064];
+		int ii = 0;
+		while(inputStream.hasNext()){
+			String line= inputStream.next();
+			String[] values = line.split(",");
+			for(int j = 0 ; j < values.length ; j++) {
+				if(j == 2) {
+					data[ii] = values[j];
+				} 
+			}
+			ii++;
+		}
+		inputStream.close();
+		
+		
+		
+		
+		
+		
 		Hashtable<Double,Integer> hash = new Hashtable<Double,Integer>();
 		for(int i = 0 ; i < test.length ; i++) {
 			double[] euclids = new double[train.length];
@@ -30,17 +55,26 @@ public class KNN {
 				hash.put(euclid, j);
 			}
 			Arrays.sort(euclids);
+			
+//			for(int j=0;j<euclids.length;j++) {
+//				System.out.println("----->"+euclids[j]);
+//			}
+			double w = 0;
 			for(int j = 0 ; j < k ; j++) {
-				sum += train[hash.get(euclids[j])][2];
+				w += 1/(euclids[j]+1.2345);
+				//System.out.println("euclid : "+euclids[j]);
+				sum += train[hash.get(euclids[j])][2] * (1/(euclids[j]+1.2345));
 			}
-			System.out.println("store : "+test[i][0]+" dept : "+test[i][1]+" isHolidsay"+test[i][2]+" weekly_sales : "+sum/k);
+//			System.out.println("w8 : "+w);
+//			System.out.println("sum : "+sum);
+			System.out.println((int)test[i][0]+"_"+(int)test[i][1]+"_"+data[i]+","+sum/(w));
 		}
 	}
-	
+
 	public static double euclidean(double a,double b,double c,double x,double y,double z) {
 		return Math.sqrt(Math.pow(a-x, 2)+Math.pow(b-y, 2)+Math.pow(c-z, 2));
 	}
-	
+
 	public static double[][] read(String path,int size) throws FileNotFoundException {
 		String fileName= path;
 		File file= new File(fileName);
